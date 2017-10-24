@@ -4,7 +4,7 @@
 --
 
 -- Thanks to VanessaE, Tenplus1, paramat and all others who
--- contribute to this mod 
+-- contribute to this mod
 
 palm = {}
 
@@ -30,7 +30,7 @@ palm.palmtree = {
 		ai, ai, ai, ai, ai, ai, ai, ai, ai,
 		ai, ai, ai, ai, ai, ai, ai, ai, ai,
 		ai, ai, ai, ai, ai, ai, ai, ai, ai,
-		
+
 		ai, ai, ai, ai, ai, ai, ai, ai, ai,
 		ai, ai, ai, ai, ai, ai, ai, ai, ai,
 		ai, ai, ai, ai, ai, ai, ai, ai, ai,
@@ -40,7 +40,7 @@ palm.palmtree = {
 		ai, ai, ai, ai, ai, lp, ai, ai, ai,
 		ai, ai, ai, ai, ai, ai, ai, ai, ai,
 		ai, ai, ai, ai, ai, ai, ai, ai, ai,
-		
+
 		ai, ai, ai, ai, ai, ai, ai, ai, ai,
 		ai, ai, ai, ai, ai, ai, ai, ai, ai,
 		ai, ai, ai, ai, ai, ai, ai, ai, ai,
@@ -50,7 +50,7 @@ palm.palmtree = {
 		ai, ai, ai, ai, ai, lp, ai, ai, ai,
 		ai, ai, ai, ai, ai, lp, ai, ai, ai,
 		ai, ai, ai, ai, ai, ai, ai, ai, ai,
-		
+
 		ai, ai, ai, ai, ai, ai, ai, ai, ai,
 		ai, ai, ai, ai, ai, ai, ai, ai, ai,
 		ai, ai, ai, ai, ai, ai, ai, ai, ai,
@@ -60,7 +60,7 @@ palm.palmtree = {
 		ai, ai, ai, ai, ai, cn, ai, ai, ai,
 		ai, ai, ai, ai, ai, lp, ai, ai, ai,
 		ai, ai, ai, ai, ai, ai, ai, ai, ai,
-		
+
 		ai, ai, ai, ai, tf, ai, ai, ai, ai,
 		ai, ai, ai, ai, tf, ai, ai, ai, ai,
 		ai, ai, ai, ai, tr, ai, ai, ai, ai,
@@ -70,7 +70,7 @@ palm.palmtree = {
 		ai, ai, lp, lp, cn, tr, cn, lp, lp,
 		ai, ai, ai, lp, lp, lp, lp, lp, ai,
 		ai, ai, ai, ai, ai, lp, ai, ai, ai,
-		
+
 		ai, ai, ai, ai, ai, ai, ai, ai, ai,
 		ai, ai, ai, ai, ai, ai, ai, ai, ai,
 		ai, ai, ai, ai, ai, ai, ai, ai, ai,
@@ -104,7 +104,7 @@ palm.palmtree = {
 		ai, ai, ai, ai, ai, ai, ai, ai, ai,
 		ai, ai, ai, ai, ai, ai, ai, ai, ai,
 		ai, ai, ai, ai, ai, ai, ai, ai, ai,
-		ai, ai, ai, ai, ai, ai, ai, ai, ai, 
+		ai, ai, ai, ai, ai, ai, ai, ai, ai,
 		ai, ai, ai, ai, ai, ai, ai, ai, ai,
 		ai, ai, ai, ai, ai, ai, ai, ai, ai,
 		ai, ai, ai, ai, ai, ai, ai, ai, ai,
@@ -149,8 +149,15 @@ end
 minetest.register_decoration({
 	deco_type = "schematic",
 	place_on = {"default:sand"},
-	sidelen = 80,
-	fill_ratio = 0.008,
+		sidelen = 16,
+		noise_params = {
+			offset = 0.01,
+			scale = 0.002,
+			spread = {x = 250, y = 250, z = 250},
+			seed = 2337,
+			octaves = 3,
+			persist = 0.66
+		},
 	biomes = {"sandstone_desert_ocean", "desert_ocean"},
 	y_min = 1,
 	y_max = 2,
@@ -187,7 +194,7 @@ minetest.register_node("palm:sapling", {
 	end,
 
 	on_place = function(itemstack, placer, pointed_thing)
-		itemstack = tree.sapling_on_place(itemstack, placer, pointed_thing,
+		itemstack = default.sapling_on_place(itemstack, placer, pointed_thing,
 			"palm:sapling",
 			-- minp, maxp to be checked, relative to sapling pos
 			-- minp_relative.y = 1 because sapling pos has been checked
@@ -212,10 +219,6 @@ minetest.register_node("palm:trunk", {
 	sounds = default.node_sound_wood_defaults(),
 	paramtype2 = "facedir",
 	on_place = minetest.rotate_node,
-
-	after_destruct = function(pos, oldnode)
-		tree.search_leaves_for_decay(pos, 3, {"palm:leaves", "palm:coconut"})
-	end,
 })
 
 -- palm wood
@@ -248,9 +251,6 @@ minetest.register_node("palm:leaves", {
 		}
 	},
 	sounds = default.node_sound_leaves_defaults(),
-	on_timer = function(pos, elapsed)
-		tree.decay_leaves(pos, 3, "palm:trunk", "palm:leaves")
-	end,
 	after_place_node = default.after_place_leaves,
 })
 
@@ -274,9 +274,6 @@ minetest.register_node("palm:coconut", {
 	},
 	drop = "palm:coconut_slice 4",
 	sounds = default.node_sound_wood_defaults(),
-	on_timer = function(pos, elapsed)
-		tree.decay_leaves(pos, 3, "palm:trunk", "palm:coconut")
-	end,
 })
 
 -- Candle from Wax and String/Cotton
@@ -295,7 +292,7 @@ minetest.register_node("palm:candle", {
 				length = 1.0
 			}
 		},
-	},	
+	},
 	paramtype = "light",
 	light_source = 11,
 	sunlight_propagates = true,
@@ -400,4 +397,10 @@ minetest.register_lbm({
 	action = function(pos)
 		minetest.get_node_timer(pos):start(math.random(1200, 2400))
 	end
+})
+
+default.register_leafdecay({
+	trunks = {"palm:trunk"},
+	leaves = {"palm:leaves", "palm:coconut"},
+	radius = 3,
 })

@@ -1,3 +1,11 @@
+
+--
+-- Birch Tree
+--
+
+-- Thanks to VanessaE, Tenplus1, paramat and all others who
+-- contribute to this mod
+
 birch = {}
 
 
@@ -63,7 +71,7 @@ birch.birchtree = {
 
 
 local function grow_new_birch_tree(pos)
-	if not tree.can_grow(pos) then
+	if not default.can_grow(pos) then
 		-- try a bit later again
 		minetest.get_node_timer(pos):start(math.random(240, 600))
 		return
@@ -72,6 +80,10 @@ local function grow_new_birch_tree(pos)
 	minetest.place_schematic({x = pos.x - 2, y = pos.y - 1, z = pos.z - 2},
 		birch.birchtree, "0", nil, false)
 end
+
+--
+-- Decoration
+--
 
 
 minetest.register_decoration({
@@ -92,6 +104,10 @@ minetest.register_decoration({
 	schematic = birch.birchtree,
 	flags = "place_center_x, place_center_z",
 })
+
+--
+-- Nodes
+--
 
 minetest.register_node("birch:sapling", {
 	description = "Birch Sapling",
@@ -117,7 +133,7 @@ minetest.register_node("birch:sapling", {
 	end,
 
 	on_place = function(itemstack, placer, pointed_thing)
-		itemstack = tree.sapling_on_place(itemstack, placer, pointed_thing,
+		itemstack = default.sapling_on_place(itemstack, placer, pointed_thing,
 			"birch:sapling",
 			-- minp, maxp to be checked, relative to sapling pos
 			-- minp_relative.y = 1 because sapling pos has been checked
@@ -142,10 +158,6 @@ minetest.register_node("birch:trunk", {
 	sounds = default.node_sound_wood_defaults(),
 	paramtype2 = "facedir",
 	on_place = minetest.rotate_node,
-
-	after_destruct = function(pos, oldnode)
-		tree.search_leaves_for_decay(pos, 3, "birch:leaves")
-	end,
 })
 
 -- birch wood
@@ -177,11 +189,16 @@ minetest.register_node("birch:leaves", {
 		}
 	},
 	sounds = default.node_sound_leaves_defaults(),
-	after_place_node = tree.after_place_leaves,
-	on_timer = function(pos, elapsed)
-		tree.decay_leaves(pos, 2, "birch:trunk", "birch:leaves")
-	end,
+	after_place_node = default.after_place_leaves,
 })
+
+--
+-- Craftitems
+--
+
+--
+-- Recipes
+--
 
 minetest.register_craft({
 	output = "birch:wood 4",
@@ -207,4 +224,10 @@ minetest.register_lbm({
 	action = function(pos)
 		minetest.get_node_timer(pos):start(math.random(1200, 2400))
 	end
+})
+
+default.register_leafdecay({
+	trunks = {"birch:trunk"},
+	leaves = {"birch:leaves"},
+	radius = 3,
 })
